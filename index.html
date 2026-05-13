@@ -331,6 +331,28 @@
             color: #b91c1c;
         }
 
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin: 24px 0;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .img-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        @media (min-width: 640px) {
+            .img-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         .api-body {
             padding: 16px;
         }
@@ -414,23 +436,120 @@
             color: #b91c1c;
         }
 
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 12px 20px;
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: #f0f0f0;
+        }
+
         @media (max-width: 720px) {
             .page {
                 grid-template-columns: 1fr;
             }
 
+            .mobile-header {
+                display: flex;
+            }
+
             .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                height: auto;
+                left: -240px;
+                width: 240px;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
                 display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(2px);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.open {
+                display: block;
             }
 
             .main {
-                padding: 36px 20px 60px;
+                padding: 32px 20px 80px;
             }
+
+            .doc-title {
+                font-size: 26px;
+            }
+
+            h2 {
+                font-size: 18px;
+                margin-top: 36px;
+            }
+
+            .api-head {
+                flex-wrap: wrap;
+            }
+            
+            .api-path {
+                word-break: break-all;
+            }
+
+            .code-block-bar span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                margin-right: 8px;
+            }
+
         }
     </style>
 </head>
 
 <body>
+    <div class="sidebar-overlay" id="overlay"></div>
+    <header class="mobile-header">
+        <strong>UG Policy</strong>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+    </header>
     <div class="page">
 
         <aside class="sidebar">
@@ -481,6 +600,10 @@
                 <p>The core objective is to reduce friction in reporting sensitive incidents through an intuitive,
                     anonymous, and secure digital portal while empowering administration with actionable tools to handle
                     cases systematically.</p>
+                <div class="img-grid">
+                    <img src="public/1.png" alt="UG Policy Landing Page">
+                    <img src="public/5.png" alt="Advocating for Change">
+                </div>
             </section>
 
             <section class="section" id="architecture">
@@ -620,6 +743,7 @@
                         </tbody>
                     </table>
                 </div>
+                <img src="public/4.png" alt="Public Resources and Support">
 
                 <h3>Authentication Zone</h3>
                 <div class="table-wrap">
@@ -882,6 +1006,7 @@ export function getDb(): Pool {
                         identification. When <code>anonymous: true</code>, the frontend strips identifying metadata
                         before transmission.</li>
                 </ul>
+                <img src="public/2.png" alt="SecureGuard Admin Login">
             </section>
 
             <section class="section" id="workflows">
@@ -917,6 +1042,7 @@ export function getDb(): Pool {
                                 tracking ID where applicable.</span></div>
                     </div>
                 </div>
+                <img src="public/3.png" alt="Reporting Form Interface">
 
                 <h3>8.2 — Triage Flow (Admin)</h3>
                 <div class="steps">
@@ -1200,6 +1326,27 @@ curl -X POST http://localhost:3000/api/setup</pre>
 
         const sections = document.querySelectorAll('section[id]');
         const links = document.querySelectorAll('.sidebar nav a');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menuToggle');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 720) {
+                    toggleMenu();
+                }
+            });
+        });
+
         const io = new IntersectionObserver(entries => {
             entries.forEach(e => {
                 if (e.isIntersecting) {
